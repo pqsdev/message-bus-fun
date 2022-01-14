@@ -1,0 +1,266 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: message-fun
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: message-fun-secret
+  namespace: message-fun
+data:
+  # con el nombre de host en vezde la IP... no me funciono
+  # database: U2VydmVyPXdrcy13MTAtZC0yNy5wcXMuY29tLmxvY2FsO0RhdGFiYXNlPUpvYlNlcnZpY2U7VXNlciBJZD1zYTtQYXNzd29yZD1QYXNzd29yZCEyMzs=
+  database: U2VydmVyPTE5Mi4xNjguMC4xMjE7RGF0YWJhc2U9Sm9iU2VydmljZTtVc2VyIElkPXNhO1Bhc3N3b3JkPVBhc3N3b3JkITIzOw==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: message-bus-fun-api-config
+  namespace: message-fun
+  labels:
+    app: message-bus-fun-api
+data:
+  appsettings.json: |
+    {
+      "Serilog": {
+        "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.Async", "Serilog.Exceptions" ],
+        "MinimumLevel": {
+          "Default": "Information",
+          "Override": {
+            "Microsoft": "Warning",
+            "Microsoft.EntityFrameworkCore": "Warning",
+            "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+            "Microsoft.Hosting.Lifetime": "Information"
+          }
+        },
+        "WriteTo": [
+          {
+            "Name": "Async",
+            "Args": {
+              "configure": [
+                {
+                  "Name": "Console",
+                  "Args": {
+                    "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Literate, Serilog.Sinks.Console",
+                    "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <s:{SourceContext}>{NewLine}{Exception}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
+      },
+      "RabbitMQ": {
+        "Host": "rabbitmq://myrabbitmq-nodes.rabbit.svc.cluster.local:5672/test-vhost",
+        "Username": "tst",
+        "Password": "Password!23"
+      },
+      "Kestrel": {
+        "Endpoints": {
+          "Http": {
+            "Url": "http://+:8080"
+          }
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-bus-fun-api
+  namespace: message-fun
+  labels:
+    app: message-bus-fun-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: message-bus-fun-api
+  template:
+    metadata:
+      labels:
+        app: message-bus-fun-api
+        service: message-bus-fun-api
+    spec:
+      containers:
+        - name: message-bus-fun-api
+          image: pqsar/message-bus-fun-api
+          imagePullPolicy: IfNotPresent # necesario para pruebas con el repo LOCAL
+          ports:  
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: Serilog__Properties__Application
+              value: "message-bus-fun-api"
+            - name: ConnectionStrings__JobServiceSql
+              valueFrom:
+                secretKeyRef:
+                  name: message-fun-secret
+                  key: database
+            - name: TZ
+              value: America/Buenos_Aires
+          volumeMounts:
+            - name: config-api-volume
+              mountPath: /app/appsettings.json
+              subPath: appsettings.json
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      volumes:
+        - name: config-api-volume
+          configMap:
+            name: message-bus-fun-api-config
+            items:
+              - key: appsettings.json
+                path: appsettings.json
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-bus-fun-api
+  namespace: message-fun
+  labels:
+    app: message-bus-fun-api
+spec:
+  type: ClusterIP
+  selector:
+    app: message-bus-fun-api
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: message-fun-ingress
+  namespace: message-fun
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned-cluster-issuer
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: "localhost"
+    http:
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: message-bus-fun-api
+              port:
+                number: 80
+        - path: /swagger
+          pathType: Prefix
+          backend:
+            service:
+              name: message-bus-fun-api
+              port:
+                number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: message-bus-fun-worker-config
+  namespace: message-fun
+  labels:
+    app: message-bus-fun-worker
+data:
+  appsettings.json: |
+    {
+      "Serilog": {
+        "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.Async", "Serilog.Exceptions" ],
+        "MinimumLevel": {
+          "Default": "Information",
+          "Override": {
+            "Microsoft": "Warning",
+            "Microsoft.EntityFrameworkCore": "Warning",
+            "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+            "Microsoft.Hosting.Lifetime": "Information"
+          }
+        },
+        "WriteTo": [
+          {
+            "Name": "Async",
+            "Args": {
+              "configure": [
+                {
+                  "Name": "Console",
+                  "Args": {
+                    "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Literate, Serilog.Sinks.Console",
+                    "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <s:{SourceContext}>{NewLine}{Exception}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
+      },
+      "RabbitMQ": {
+        "Host": "rabbitmq://myrabbitmq-nodes.rabbit.svc.cluster.local:5672/test-vhost",
+        "Username": "tst",
+        "Password": "Password!23"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-bus-fun-worker
+  namespace: message-fun
+  labels:
+    app: message-bus-fun-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: message-bus-fun-worker
+  template:
+    metadata:
+      labels:
+        app: message-bus-fun-worker
+        service: message-bus-fun-worker
+    spec:
+      containers:
+        - name: message-bus-fun-worker
+          image: pqsar/message-bus-fun-worker
+          imagePullPolicy: IfNotPresent # necesario para pruebas con el repo LOCAL
+          ports:  
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: Serilog__Properties__Application
+              value: "message-bus-fun-worker"
+            - name: ConnectionStrings__JobServiceSql
+              valueFrom:
+                secretKeyRef:
+                  name: message-fun-secret
+                  key: database
+            - name: TZ
+              value: America/Buenos_Aires
+          volumeMounts:
+            - name: config-api-volume
+              mountPath: /app/appsettings.json
+              subPath: appsettings.json
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      volumes:
+        - name: config-api-volume
+          configMap:
+            name: message-bus-fun-worker-config
+            items:
+              - key: appsettings.json
+                path: appsettings.json

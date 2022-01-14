@@ -1,0 +1,32 @@
+{
+	"info": {
+		"_postman_id": "e6dfbd59-dd4b-474b-b5d3-e00cad1c5f2e",
+		"name": "masstransit",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "prueba-masstransit",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/api/Jobs/{{$randomInt}}",
+					"protocol": "http",
+					"host": [
+						"wks-w10-d-27",
+						"pqs",
+						"com",
+						"local"
+					],
+					"path": [
+						"api",
+						"Jobs",
+						"{{$randomInt}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
