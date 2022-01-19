@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  pqs.messagebusfun.api:
+    image: ${DOCKER_REGISTRY-}pqsmessagebusfunapi
+    build:
+      context: .
+      dockerfile: PQS.MessageBusFun.Api/Dockerfile
+
+  pqs.messagebusfun.worker:
+    image: ${DOCKER_REGISTRY-}pqsmessagebusfunworker
+    build:
+      context: .
+      dockerfile: PQS.MessageBusFun.Worker/Dockerfile

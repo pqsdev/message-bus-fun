@@ -1,0 +1,58 @@
+version: '3.4'
+
+services:
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    ports:
+      - "5672:5672"     #amqp port
+      - "15672:15672"   #web admin port
+    networks:
+      - network
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-CU8-ubuntu-16.04
+    user: '0:0' # run as root
+    ports:
+      - '1433:1433' # SQL DEFAUTL PORT
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password!23
+      - MSSQL_PID=Developer
+      - MSSQL_TCP_PORT=1433
+    volumes:
+      - sqlvolume:/var/opt/mssql
+    networks:
+      - network
+  pqs.messagebusfun.api:
+    ports:
+      - "5000:80"
+    depends_on:
+      - mssql
+      - rabbitmq
+      - pqs.messagebusfun.worker
+    links: 
+      - mssql
+      - rabbitmq
+    networks:
+      - network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=compose 
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  pqs.messagebusfun.worker:
+    environment:
+      - DOTNET_ENVIRONMENT=compose # In NON WEB project this is the envirioment variable that holds the envrioment
+    depends_on:
+      - mssql
+      - rabbitmq
+    links: 
+      - mssql
+      - rabbitmq
+    networks:
+      - network
+networks:
+  # Declare our private network.  We must declare one for the magic
+  # Docker DNS to work, but otherwise its default settings are fine.
+  network: {}
+volumes:
+  sqlvolume: {}

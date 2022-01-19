@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31729.503
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PQS.MessageBusFun.Api", "PQS.MessageBusFun.Api\PQS.MessageBusFun.Api.csproj", "{29F28ECA-5605-41E2-B8AE-BD71DF527FD3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PQS.MessageBusFun.Worker", "PQS.MessageBusFun.Worker\PQS.MessageBusFun.Worker.csproj", "{DB738DB2-B9B5-4556-AF13-916BAC1194EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PQS.MessageBusFun.Messaging.Components", "PQS.MessageBusFun.Messaging.Components\PQS.MessageBusFun.Messaging.Components.csproj", "{6EF31934-F847-422D-BE2C-830F3CBD7E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PQS.MessageBusFun.Messaging.Components", "PQS.MessageBusFun.Messaging.Components\PQS.MessageBusFun.Messaging.Components.csproj", "{6EF31934-F847-422D-BE2C-830F3CBD7E62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PQS.MessageBusFun.Messaging.Contracts", "PQS.MessageBusFun.Messaging.Contracts\PQS.MessageBusFun.Messaging.Contracts.csproj", "{9D981CFD-E903-43C1-8A3D-DCECAFA14392}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PQS.MessageBusFun.Messaging.Contracts", "PQS.MessageBusFun.Messaging.Contracts\PQS.MessageBusFun.Messaging.Contracts.csproj", "{9D981CFD-E903-43C1-8A3D-DCECAFA14392}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{ECC6CC3C-64C4-4D90-9EF2-49ABD6916F1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{9D981CFD-E903-43C1-8A3D-DCECAFA14392}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D981CFD-E903-43C1-8A3D-DCECAFA14392}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D981CFD-E903-43C1-8A3D-DCECAFA14392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECC6CC3C-64C4-4D90-9EF2-49ABD6916F1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECC6CC3C-64C4-4D90-9EF2-49ABD6916F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECC6CC3C-64C4-4D90-9EF2-49ABD6916F1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECC6CC3C-64C4-4D90-9EF2-49ABD6916F1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

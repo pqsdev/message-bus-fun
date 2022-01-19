@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "pqs.messagebusfun.api",
+      "composeLaunchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "mssql": "StartWithoutDebugging",
+        "pqs.messagebusfun.api": "StartDebugging",
+        "pqs.messagebusfun.worker": "StartDebugging",
+        "rabbitmq": "StartWithoutDebugging"
+      }
+    }
+  }
+}
